@@ -1,7 +1,19 @@
 <template>
   <div class="tasks_container">
     <div class="add_task">
-
+      <form v-on:submit.prevent="submitForm">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" class="form-control" id="title" v-model="title">
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" id="description" v-model="description"></textarea>
+        </div>
+        <div class="form-group">
+          <button type="submit">Add Task</button>
+        </div>
+      </form>
     </div>
     <div class="tasks_content">
       <h1>Tasks</h1>
@@ -23,7 +35,9 @@
 export default {
   data() {
     return {
-      tasks: ['']
+      tasks: [''],
+      title: '',
+      description: ''
     }
   },
   methods: {
@@ -35,6 +49,45 @@ export default {
         console.log(error);
       }
     },
+
+    async submitForm() {
+      try {
+        const response = await this.$http.post('http://localhost:8001/api/tasks', {
+          title: this.title,
+          description: this.description,
+          completed: false
+        });
+
+        this.tasks.push(response.data);
+        this.title = '';
+        this.description = '';
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async toggleTask(task) {
+      try {
+        const response = await this.$http.put('http://localhost:8001/api/tasks/' + task.id, {
+          completed: !task.completed,
+          title: task.title,
+          description: task.description
+        });
+
+        let taskIndex = this.tasks.findIndex(t => t.id === task.id);
+
+        this.tasks = this.tasks.map((task) => {
+          if (this.tasks.findIndex(t => t.id === task.id) === taskIndex) {
+            return response.data;
+          }
+
+          return task;
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
   },
   created() {
     this.getData();
