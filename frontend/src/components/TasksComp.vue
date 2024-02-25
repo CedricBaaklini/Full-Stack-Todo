@@ -87,6 +87,20 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+
+    async deleteTask(task) {
+      let confirmation = confirm("Do you want to delete this task?");
+
+      if (confirmation) {
+        try {
+          await this.$http.delete(`http://localhost:8001/api/tasks/${task.id}`);
+
+          this.getData()
+        } catch (error) {
+          console.log(error);
+        }
+      }
     }
   },
   created() {
